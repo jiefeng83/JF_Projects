@@ -39,6 +39,14 @@ namespace ShirtekApp1
         private void readButton_Click(object sender, EventArgs e)
         {
             fileList.Clear();
+            woDataList.Clear();
+            dataGridView1.Rows.Clear();
+
+            if (!Directory.Exists(@pathTextBox.Text))
+            {
+                statusStrip1.Text = "Directory not found.";
+                return;
+            }
 
             foreach (string s in Directory.GetFiles(@pathTextBox.Text, "*.xls").Select(Path.GetFileName))
             {
@@ -71,21 +79,21 @@ namespace ShirtekApp1
                     woData.storeCode1 = (array.Length > 0) ? array[0] : "";
                     woData.storeCode2 = (array.Length > 1) ? array[1] : "";
                     woData.doNumber = (dataTable.Rows[17][8] != null) ? dataTable.Rows[17][8].ToString() : "";
-                    woData.woNumber = (dataTable.Rows[17][8] != null) ? "A" + dataTable.Rows[16][8].ToString() + ": "  + dataTable.Rows[50][1].ToString(): "";
+                    woData.woNumber = (dataTable.Rows[17][8] != null) ? "A" + dataTable.Rows[16][8].ToString() + "- "  + dataTable.Rows[50][1].ToString(): "";
                     woData.netAmount = (dataTable.Rows[54][12] != null) ? dataTable.Rows[54][12].ToString() : "";
-                    woData.fileName = fileName;
+                    woData.fileName = fileName.Replace(".xls", "");
 
                     woDataList.Add(woData);
                 }
-
-
             }
+
+            List<WorkOrderData> woDataListSorted = woDataList.OrderBy(o => o.fileName).ToList();
 
             dataGridView1.SuspendLayout();
             dataGridView1.Rows.Add(woDataList.Count);
 
             int rowIndex = 0;
-            foreach (WorkOrderData wod in woDataList)
+            foreach (WorkOrderData wod in woDataListSorted)
             {
                 dataGridView1.Rows[rowIndex].Cells[0].Value = rowIndex + 1;
                 dataGridView1.Rows[rowIndex].Cells[1].Value = "";
@@ -104,14 +112,24 @@ namespace ShirtekApp1
                 dataGridView1.Rows[rowIndex].Cells[14].Value = wod.fileName;
                 rowIndex++;
             }
-            dataGridView1.ResumeLayout();
 
-            statusStrip1.Text = woDataList.Count + " files read. Data copied to clipboard. Paste directly to Excel ;)";
-
+            //dataGridView1.Sort(dataGridView1.Columns[14], ListSortDirection.Ascending);
             dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-            dataGridView1.SelectAll();
+
+            dataGridView1.ResumeLayout();
+            dataGridView1.ClearSelection();
+            for (int i = 0; i < dataGridView1.ColumnCount - 1; i++)
+            {
+                for (int r = 0; r < dataGridView1.RowCount; r++)
+                    dataGridView1[i, r].Selected = true;
+            }
+            //dataGridView1.SelectAll();
+
+            
             DataObject dataObj = dataGridView1.GetClipboardContent();
             Clipboard.SetDataObject(dataObj, true);
+
+            statusStrip1.Text = woDataListSorted.Count + " files read. Data copied to clipboard. Paste directly to Excel ;)";
         }
 
         private void testing(DataTable dataTable)

@@ -97,13 +97,13 @@
             this.dataGridView1.Location = new System.Drawing.Point(13, 41);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersVisible = false;
-            this.dataGridView1.Size = new System.Drawing.Size(712, 178);
+            this.dataGridView1.Size = new System.Drawing.Size(734, 178);
             this.dataGridView1.TabIndex = 0;
             // 
             // browseButton
             // 
             this.browseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.browseButton.Location = new System.Drawing.Point(569, 12);
+            this.browseButton.Location = new System.Drawing.Point(591, 12);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(75, 23);
             this.browseButton.TabIndex = 1;
@@ -117,7 +117,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pathTextBox.Location = new System.Drawing.Point(57, 12);
             this.pathTextBox.Name = "pathTextBox";
-            this.pathTextBox.Size = new System.Drawing.Size(506, 20);
+            this.pathTextBox.Size = new System.Drawing.Size(528, 20);
             this.pathTextBox.TabIndex = 2;
             this.pathTextBox.Text = "C:\\Users\\Jiefeng\\Desktop\\data\\";
             // 
@@ -134,7 +134,7 @@
             // 
             this.readButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.readButton.BackColor = System.Drawing.Color.LawnGreen;
-            this.readButton.Location = new System.Drawing.Point(650, 12);
+            this.readButton.Location = new System.Drawing.Point(672, 12);
             this.readButton.Name = "readButton";
             this.readButton.Size = new System.Drawing.Size(75, 23);
             this.readButton.TabIndex = 1;
@@ -149,7 +149,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(2, 226);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ReadOnly = true;
-            this.statusStrip1.Size = new System.Drawing.Size(734, 20);
+            this.statusStrip1.Size = new System.Drawing.Size(756, 20);
             this.statusStrip1.TabIndex = 4;
             // 
             // Column6
@@ -185,6 +185,7 @@
             // Column2
             // 
             this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column2.FillWeight = 60F;
             this.Column2.HeaderText = "Store Code1";
             this.Column2.Name = "Column2";
             this.Column2.ReadOnly = true;
@@ -192,6 +193,7 @@
             // Column3
             // 
             this.Column3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column3.FillWeight = 60F;
             this.Column3.HeaderText = "Store Code2";
             this.Column3.Name = "Column3";
             this.Column3.ReadOnly = true;
@@ -265,13 +267,12 @@
             this.Column8.HeaderText = "File Name";
             this.Column8.Name = "Column8";
             this.Column8.ReadOnly = true;
-            this.Column8.Visible = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(737, 250);
+            this.ClientSize = new System.Drawing.Size(759, 250);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pathTextBox);
