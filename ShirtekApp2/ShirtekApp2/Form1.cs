@@ -69,19 +69,24 @@ namespace ShirtekApp2
 
                 DataTable dataTable = ds.Tables["Sheet1"];
 
+                string[] strArray = dataTable.Rows[2][0].ToString().Split(':');
+                string invoiceDate = strArray.Length >=2 ? strArray[1].Replace("-","") : "";
+
                 for (int i = 0; i < dataTable.Rows.Count; i++)
                 {
-                    if (dataTable.Rows[i][3] != null)
+                    if (dataTable.Rows[i][3] != null && dataTable.Rows[i][3].ToString() != "" && !dataTable.Rows[i][3].ToString().Contains("ACCOUNT"))
                     {
+
+                        string a = dataTable.Rows[i][3].ToString();
                         WorkOrderData woData = new WorkOrderData();
 
                         woData.date = (dataTable.Rows[i][2] != null) ? dataTable.Rows[i][2].ToString() : "";
                         woData.storeCode1 = (dataTable.Rows[i][4] != null) ? dataTable.Rows[i][4].ToString() : "";
                         woData.storeCode2 = (dataTable.Rows[i][5] != null) ? dataTable.Rows[i][5].ToString() : "";
                         woData.doNumber = (dataTable.Rows[i][13] != null) ? dataTable.Rows[i][13].ToString() : "";
-                        woData.woNumber = (dataTable.Rows[i][6] != null) ? dataTable.Rows[i][6].ToString() : "";
+                        woData.woNumber = (dataTable.Rows[i][6] != null) ? dataTable.Rows[i][6].ToString().Substring(1,6) : "";
                         woData.netAmount = (dataTable.Rows[i][7] != null) ? dataTable.Rows[i][7].ToString() : "";
-                        woData.invoiceDate =(dataTable.Rows[4][0] != null) ? dataTable.Rows[4][0].ToString() : "";
+                        woData.invoiceDate = invoiceDate;
                         woData.invoiceNo = (dataTable.Rows[i][1] != null) ? dataTable.Rows[i][1].ToString() : "";
                         woData.fileName = fileName.Replace(".xls", "");
 
