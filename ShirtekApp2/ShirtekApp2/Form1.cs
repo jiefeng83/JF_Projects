@@ -96,7 +96,6 @@ namespace ShirtekApp2
                 {
                     if (dataTable.Rows[i][3] != null && dataTable.Rows[i][3].ToString() != "" && !dataTable.Rows[i][3].ToString().Contains("ACCOUNT"))
                     {
-
                         string a = dataTable.Rows[i][3].ToString();
                         WorkOrderData woData = new WorkOrderData();
 
@@ -123,6 +122,7 @@ namespace ShirtekApp2
                         woData.invoiceNo = (dataTable.Rows[i][1] != null) ? dataTable.Rows[i][1].ToString() : "";
                         woData.fileName = fileName.Replace(".xls", "");
                         woData.spNumber = spNumber;
+                        woData.outlet = "McDonald's Restaurant";
                         woDataList.Add(woData);
                     }
                 }
@@ -197,8 +197,23 @@ namespace ShirtekApp2
         {
             List<WorkOrderData> woDataListSorted = woDataList.OrderBy(o => o.invoiceNo).ToList();
 
+            int num1=0, num2=0;
+            for (int i = 1; i < woDataListSorted.Count; i++)
+            {
+                num1 = 0; 
+                num2 = 0;
+                int.TryParse(woDataListSorted[i].invoiceNo, out num2);
+                int.TryParse(woDataListSorted[i-1].invoiceNo, out num1);
+                if (num2 - num1 > 1)
+                {
+                    woDataListSorted.Insert(i, new WorkOrderData(++num1));
+                }
+            }
+
             dataGridView1.SuspendLayout();
-            dataGridView1.Rows.Add(woDataList.Count + (woDataList.Count * 2 / 25) + 5);
+
+            if (woDataList.Count > 0)
+                dataGridView1.Rows.Add(woDataListSorted.Count);
 
             int rowIndex = 0;
             int number = 0;
@@ -220,7 +235,7 @@ namespace ShirtekApp2
             {
                 dataGridView1.Rows[rowIndex].Cells[0].Value = wod.date;
                 dataGridView1.Rows[rowIndex].Cells[1].Value = wod.doNumber;
-                dataGridView1.Rows[rowIndex].Cells[2].Value = "McDonald's Restaurant";
+                dataGridView1.Rows[rowIndex].Cells[2].Value = wod.outlet;
                 dataGridView1.Rows[rowIndex].Cells[3].Value = wod.netAmount;
                 dataGridView1.Rows[rowIndex].Cells[4].Value = wod.woNumber;
                 dataGridView1.Rows[rowIndex].Cells[5].Value = wod.invoiceNo;
@@ -230,10 +245,14 @@ namespace ShirtekApp2
                 dataGridView1.Rows[rowIndex].Cells[9].Value = "";
 
                 rowIndex++;
-                number++;
+
+                number = 1;
+                int.TryParse(wod.invoiceNo, out number);
 
                 if (number % 25 == 0)
                 {
+                    dataGridView1.Rows.Add(2);
+
                     dataGridView1.Rows[rowIndex].Cells[0].Value = "";
                     dataGridView1.Rows[rowIndex].Cells[1].Value = "";
                     dataGridView1.Rows[rowIndex].Cells[2].Value = "";
@@ -300,17 +319,24 @@ namespace ShirtekApp2
 
     public class WorkOrderData
     {
-        public string date;
-        public string date_month;
-        public string date_day;
-        public string storeCode1;
-        public string storeCode2;
-        public string netAmount;
-        public string doNumber;
-        public string woNumber;
-        public string fileName;
-        public string invoiceDate;
-        public string invoiceNo;
-        public string spNumber;
+        public string date = "";
+        public string date_month = "";
+        public string date_day = "";
+        public string storeCode1 = "";
+        public string storeCode2 = "";
+        public string netAmount = "";
+        public string doNumber = "";
+        public string woNumber = "";
+        public string fileName = "";
+        public string invoiceDate = "";
+        public string invoiceNo = "";
+        public string spNumber = "";
+        public string outlet = "";
+
+        public WorkOrderData(int invoiceNumber)
+        {
+            this.invoiceNo = invoiceNumber.ToString();
+        }
+        public WorkOrderData() { }
     }
 }
