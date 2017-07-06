@@ -20,6 +20,29 @@ namespace ShirtekApp1
 
         string fileName = @"C:\Users\Jiefeng\Desktop\data\McD 10 OCT  WO 2001x.xls";
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+			pathTextBox.Text = Properties.Settings.Default.FilePath;
+			
+            setDataGridCol(0, "NO.");
+            setDataGridCol(1, "INVOICE NO.");
+            setDataGridCol(2, "INVOICE DATE", 1);
+            setDataGridCol(3, "WO NO.");
+            setDataGridCol(4, "ACCT NO.");
+            setDataGridCol(5, "STR ABB");
+            setDataGridCol(6, "STR NO.");
+            setDataGridCol(7, "DESCRIPTION", 1);
+            setDataGridCol(8, "NET AMT");
+            setDataGridCol(9, "TAX AMT");
+            setDataGridCol(10, "TOTAL AMT");
+            setDataGridCol(11, "GST RATE");
+            setDataGridCol(12, "JOB STATUS", 1);
+            setDataGridCol(13, "REMARK", 1);
+            setDataGridCol(14, "WO DATE");
+            setDataGridCol(15, "DO NO.");
+            setDataGridCol(16, "FILENAME");
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -33,6 +56,8 @@ namespace ShirtekApp1
             if (result == DialogResult.OK)
             {
                 pathTextBox.Text = folderBrowserDialog1.SelectedPath + @"\";
+                Properties.Settings.Default.FilePath = pathTextBox.Text;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -79,9 +104,10 @@ namespace ShirtekApp1
                     woData.storeCode1 = (array.Length > 0) ? array[0] : "";
                     woData.storeCode2 = (array.Length > 1) ? array[1] : "";
                     woData.doNumber = (dataTable.Rows[17][8] != null) ? dataTable.Rows[17][8].ToString() : "";
-                    woData.woNumber = (dataTable.Rows[17][8] != null) ? "A" + dataTable.Rows[16][8].ToString() + "- "  + dataTable.Rows[50][1].ToString(): "";
+                    woData.woNumber = (dataTable.Rows[17][8] != null) ? "B" + dataTable.Rows[16][8].ToString() + dataTable.Rows[50][1].ToString(): "";
                     woData.netAmount = (dataTable.Rows[54][12] != null) ? dataTable.Rows[54][12].ToString() : "";
                     woData.fileName = fileName.Replace(".xls", "");
+                    woData.invNumber = (dataTable.Rows[5][10] != null) ? dataTable.Rows[5][10].ToString() : "";
 
                     woDataList.Add(woData);
                 }
@@ -91,29 +117,31 @@ namespace ShirtekApp1
 
             dataGridView1.SuspendLayout();
             dataGridView1.Rows.Add(woDataList.Count);
-
+            
             int rowIndex = 0;
             foreach (WorkOrderData wod in woDataListSorted)
             {
                 dataGridView1.Rows[rowIndex].Cells[0].Value = rowIndex + 1;
-                dataGridView1.Rows[rowIndex].Cells[1].Value = "";
-                dataGridView1.Rows[rowIndex].Cells[2].Value = wod.date;
-                dataGridView1.Rows[rowIndex].Cells[3].Value = "7415-044";
-                dataGridView1.Rows[rowIndex].Cells[4].Value = wod.storeCode1;
-                dataGridView1.Rows[rowIndex].Cells[5].Value = wod.storeCode2;
-                dataGridView1.Rows[rowIndex].Cells[6].Value = wod.woNumber;
-                dataGridView1.Rows[rowIndex].Cells[7].Value = wod.netAmount;
-                dataGridView1.Rows[rowIndex].Cells[8].Value = "$0.00";
-                dataGridView1.Rows[rowIndex].Cells[9].Value = wod.netAmount;
-                dataGridView1.Rows[rowIndex].Cells[10].Value = "0%";
-                dataGridView1.Rows[rowIndex].Cells[11].Value = "";
+                dataGridView1.Rows[rowIndex].Cells[1].Value = wod.invNumber;
+                dataGridView1.Rows[rowIndex].Cells[2].Value = ""; //invoice date
+                dataGridView1.Rows[rowIndex].Cells[3].Value = wod.woNumber;
+                dataGridView1.Rows[rowIndex].Cells[4].Value = "7415-044";
+                dataGridView1.Rows[rowIndex].Cells[5].Value = wod.storeCode1;
+                dataGridView1.Rows[rowIndex].Cells[6].Value = wod.storeCode2;
+                dataGridView1.Rows[rowIndex].Cells[7].Value = "";
+                dataGridView1.Rows[rowIndex].Cells[8].Value = wod.netAmount;
+                dataGridView1.Rows[rowIndex].Cells[9].Value = "$0.00";
+                dataGridView1.Rows[rowIndex].Cells[10].Value = wod.netAmount; //total amt
+                dataGridView1.Rows[rowIndex].Cells[11].Value = "0%"; //GST
                 dataGridView1.Rows[rowIndex].Cells[12].Value = "";
-                dataGridView1.Rows[rowIndex].Cells[13].Value = wod.doNumber;
-                dataGridView1.Rows[rowIndex].Cells[14].Value = wod.fileName;
+                dataGridView1.Rows[rowIndex].Cells[13].Value = "";
+                dataGridView1.Rows[rowIndex].Cells[14].Value = wod.date;
+                dataGridView1.Rows[rowIndex].Cells[15].Value = wod.doNumber;
+                dataGridView1.Rows[rowIndex].Cells[16].Value = wod.fileName;
                 rowIndex++;
             }
 
-            //dataGridView1.Sort(dataGridView1.Columns[14], ListSortDirection.Ascending);
+            //dataGridView1.Sort(setDataGridCol(14], ListSortDirection.Ascending);
             dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
 
             dataGridView1.ResumeLayout();
@@ -132,27 +160,13 @@ namespace ShirtekApp1
             statusStrip1.Text = woDataListSorted.Count + " files read. Data copied to clipboard. Paste directly to Excel ;)";
         }
 
-        private void testing(DataTable dataTable)
+        void setDataGridCol(int index, string header, int widthFillWeight = 100)
         {
-            int x = 0, y = 0;
-            string temp = "";
-            for (int i = 0; i < 56; i++)
-            {
-                for (int j = 0; j < 15; j++)
-                {
-                    if (dataTable.Rows[i][j] != null)
-                    {
-                        temp = dataTable.Rows[i][j].ToString();
-
-                        if (temp.Contains("12345"))
-                        {
-                            x = i; y = j;
-                            statusStrip1.Text = x + "   " + y;
-                        }
-                    }
-                }
-            }
+            dataGridView1.Columns[index].HeaderText = header;
+            dataGridView1.Columns[index].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dataGridView1.Columns[index].FillWeight = widthFillWeight;
         }
+
     }
 
     public class WorkOrderData
@@ -164,5 +178,6 @@ namespace ShirtekApp1
         public string doNumber;
         public string woNumber;
         public string fileName;
+        public string invNumber;
     }
 }

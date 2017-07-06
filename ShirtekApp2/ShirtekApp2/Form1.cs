@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Data.OleDb;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace ShirtekApp2
 {
@@ -88,7 +89,7 @@ namespace ShirtekApp2
                 DataTable dataTable = ds.Tables["Sheet1"];
 
                 string[] strArray = dataTable.Rows[2][0].ToString().Split(':');
-                string invoiceDate = strArray.Length >= 2 ? changeMonth(strArray[1].Replace("-", "")) : "";
+                string invoiceDate = strArray.Length >= 2 ? changeMonth(strArray[1].Replace("-", "")) : dataTable.Rows[2][0].ToString();
                 string[] strArray2 = fileName.Replace("  ", " ").Replace(".xls", "").Split(' ');
                 string spNumber = strArray2.Length >= 6 ? strArray2[5] : "";
 
@@ -96,34 +97,47 @@ namespace ShirtekApp2
                 {
                     if (dataTable.Rows[i][3] != null && dataTable.Rows[i][3].ToString() != "" && !dataTable.Rows[i][3].ToString().Contains("ACCOUNT"))
                     {
-                        string a = dataTable.Rows[i][3].ToString();
-                        WorkOrderData woData = new WorkOrderData();
-
-                        woData.date = (dataTable.Rows[i][2] != null) ? dataTable.Rows[i][2].ToString() : "";
-                        string[] strArray3 = woData.date.Split(' ');
-
-                        if (strArray3.Length >= 3)
+                        try
                         {
-                            woData.date_month = strArray3[1];
-                            woData.date_day = strArray3[0];
-                        }
-                        else
-                        {
-                            woData.date_month = "";
-                            woData.date_day = "";
-                        }
+                            string a = dataTable.Rows[i][3].ToString();
+                            WorkOrderData woData = new WorkOrderData();
 
-                        woData.storeCode1 = (dataTable.Rows[i][4] != null) ? dataTable.Rows[i][4].ToString() : "";
-                        woData.storeCode2 = (dataTable.Rows[i][5] != null) ? dataTable.Rows[i][5].ToString() : "";
-                        woData.doNumber = (dataTable.Rows[i][13] != null) ? dataTable.Rows[i][13].ToString() : "";
-                        woData.woNumber = (dataTable.Rows[i][6] != null) ? dataTable.Rows[i][6].ToString().Substring(1, 6) : "";
-                        woData.netAmount = (dataTable.Rows[i][7] != null) ? dataTable.Rows[i][7].ToString() : "";
-                        woData.invoiceDate = invoiceDate;
-                        woData.invoiceNo = (dataTable.Rows[i][1] != null) ? dataTable.Rows[i][1].ToString() : "";
-                        woData.fileName = fileName.Replace(".xls", "");
-                        woData.spNumber = spNumber;
-                        woData.outlet = "McDonald's Restaurant";
-                        woDataList.Add(woData);
+                            woData.date = (dataTable.Rows[i][2] != null) ? dataTable.Rows[i][2].ToString() : "";
+                            string[] strArray3 = woData.date.Split(' ');
+
+                            if (strArray3.Length >= 3)
+                            {
+                                woData.date_month = strArray3[1];
+                                woData.date_day = strArray3[0];
+                            }
+                            else
+                            {
+                                woData.date_month = "";
+                                woData.date_day = "";
+                            }
+
+                            woData.storeCode1 = (dataTable.Rows[i][4] != null) ? dataTable.Rows[i][4].ToString() : "";
+                            woData.storeCode2 = (dataTable.Rows[i][5] != null) ? dataTable.Rows[i][5].ToString() : "";
+                            woData.doNumber = (dataTable.Rows[i][13] != null) ? dataTable.Rows[i][13].ToString() : "";
+                            if (dataTable.Rows[i][6] != null)
+                            {
+                                var s = dataTable.Rows[i][6].ToString().Split('-');
+                                woData.woNumber = (s.Length > 0) ? s[0] : "";
+                            }
+                            else
+                                woData.woNumber = "";
+                            //woData.woNumber = (dataTable.Rows[i][6] != null) ? dataTable.Rows[i][6].ToString().Substring(1, 6) : "";
+                            woData.netAmount = (dataTable.Rows[i][7] != null) ? dataTable.Rows[i][7].ToString() : "";
+                            woData.invoiceDate = invoiceDate;
+                            woData.invoiceNo = (dataTable.Rows[i][1] != null) ? dataTable.Rows[i][1].ToString() : "";
+                            woData.fileName = fileName.Replace(".xls", "");
+                            woData.spNumber = spNumber;
+                            woData.outlet = "McDonald's Restaurant";
+
+                            if(Regex.IsMatch(woData.invoiceNo, @"^\d+$"))
+                                woDataList.Add(woData);
+                        }
+                        catch (Exception e) { Console.WriteLine(i); }
                     }
                 }
             }
@@ -148,7 +162,7 @@ namespace ShirtekApp2
             dataGridView2.Rows[rowIndex].Cells[7].Value = "Amount Paid";
             rowIndex++;
 
-            string lastMth = woDataListSorted[0].date_month;
+            string lastMth = woDataListSorted.Count > 0 ? woDataListSorted[0].date_month : "";
 
             foreach (WorkOrderData wod in woDataListSorted)
             {
@@ -279,7 +293,6 @@ namespace ShirtekApp2
 
                     rowIndex++;
                 }
-
             }
 
             dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
