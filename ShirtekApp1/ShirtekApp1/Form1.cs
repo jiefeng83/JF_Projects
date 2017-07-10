@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Data.OleDb;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace ShirtekApp1
 {
@@ -106,14 +107,17 @@ namespace ShirtekApp1
                     woData.doNumber = (dataTable.Rows[17][8] != null) ? dataTable.Rows[17][8].ToString() : "";
                     woData.woNumber = (dataTable.Rows[17][8] != null) ? "B" + dataTable.Rows[16][8].ToString() + dataTable.Rows[50][1].ToString(): "";
                     woData.netAmount = (dataTable.Rows[54][12] != null) ? dataTable.Rows[54][12].ToString() : "";
-                    woData.fileName = fileName.Replace(".xls", "");
+                    woData.fileName = fileName;
                     woData.invNumber = (dataTable.Rows[5][10] != null) ? dataTable.Rows[5][10].ToString() : "";
+
+                    string result = Regex.Replace(woData.fileName, @"[^\d]", "");
+                    long.TryParse(result, out woData.fileNumber);
 
                     woDataList.Add(woData);
                 }
             }
 
-            List<WorkOrderData> woDataListSorted = woDataList.OrderBy(o => o.fileName).ToList();
+            List<WorkOrderData> woDataListSorted = woDataList.OrderBy(o => o.fileNumber).ToList();
 
             dataGridView1.SuspendLayout();
             dataGridView1.Rows.Add(woDataList.Count);
@@ -179,5 +183,6 @@ namespace ShirtekApp1
         public string woNumber;
         public string fileName;
         public string invNumber;
+        public long fileNumber = 0;
     }
 }
