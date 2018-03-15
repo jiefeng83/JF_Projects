@@ -25,23 +25,47 @@ namespace ShirtekApp1
         {
 			pathTextBox.Text = Properties.Settings.Default.FilePath;
 			
-            setDataGridCol(0, "NO.");
-            setDataGridCol(1, "INVOICE NO.");
-            setDataGridCol(2, "INVOICE DATE", 1);
-            setDataGridCol(3, "WO NO.");
-            setDataGridCol(4, "ACCT NO.");
-            setDataGridCol(5, "STR ABB");
-            setDataGridCol(6, "STR NO.");
-            setDataGridCol(7, "DESCRIPTION", 1);
-            setDataGridCol(8, "NET AMT");
-            setDataGridCol(9, "TAX AMT");
-            setDataGridCol(10, "TOTAL AMT");
-            setDataGridCol(11, "GST RATE");
-            setDataGridCol(12, "JOB STATUS", 1);
-            setDataGridCol(13, "REMARK", 1);
-            setDataGridCol(14, "WO DATE");
-            setDataGridCol(15, "DO NO.");
-            setDataGridCol(16, "FILENAME");
+            setDataGridCol(dataGridView1, 0, "NO.");
+            setDataGridCol(dataGridView1, 1, "INVOICE NO.");
+            setDataGridCol(dataGridView1, 2, "INVOICE DATE", 1);
+            setDataGridCol(dataGridView1, 3, "WO NO.");
+            setDataGridCol(dataGridView1, 4, "ACCT NO.");
+            setDataGridCol(dataGridView1, 5, "STR ABB");
+            setDataGridCol(dataGridView1, 6, "STR NO.");
+            setDataGridCol(dataGridView1, 7, "DESCRIPTION", 1);
+            setDataGridCol(dataGridView1, 8, "NET AMT");
+            setDataGridCol(dataGridView1, 9, "TAX AMT");
+            setDataGridCol(dataGridView1, 10, "TOTAL AMT");
+            setDataGridCol(dataGridView1, 11, "GST RATE");
+            setDataGridCol(dataGridView1, 12, "JOB STATUS", 1);
+            setDataGridCol(dataGridView1, 13, "REMARK", 1);
+            setDataGridCol(dataGridView1, 14, "WO DATE");
+            setDataGridCol(dataGridView1, 15, "DO NO.");
+            setDataGridCol(dataGridView1, 16, "FILENAME");
+
+
+            setDataGridCol(dataGridView2, 0, "NO.");
+            setDataGridCol(dataGridView2, 1, "WORK ORDER");
+            setDataGridCol(dataGridView2, 2, "SERVICE ORDER");
+            setDataGridCol(dataGridView2, 3, "DATE");
+            setDataGridCol(dataGridView2, 4, "STR ABB");
+            setDataGridCol(dataGridView2, 5, "STR NO.");
+            setDataGridCol(dataGridView2, 6, "MODEL");
+            setDataGridCol(dataGridView2, 7, "LOCATION"); 
+            setDataGridCol(dataGridView2, 8, "LABOUR CHARGE");
+            setDataGridCol(dataGridView2, 9, "PART CHARGE");
+            setDataGridCol(dataGridView2, 10, "TOTAL");
+            setDataGridCol(dataGridView2, 11, "CAUSE");
+            setDataGridCol(dataGridView2, 12, "ACTION");
+            setDataGridCol(dataGridView2, 13, "PARTS");
+            setDataGridCol(dataGridView2, 14, "FRESER");
+            setDataGridCol(dataGridView2, 15, "TOWER");
+            setDataGridCol(dataGridView2, 16, "BACKROOM");
+            setDataGridCol(dataGridView2, 17, "ORANGE JUICE");
+            setDataGridCol(dataGridView2, 18, "OTHER");
+
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         }
 
         public Form1()
@@ -60,6 +84,27 @@ namespace ShirtekApp1
                 Properties.Settings.Default.FilePath = pathTextBox.Text;
                 Properties.Settings.Default.Save();
             }
+        }
+
+        KeywordType convertToKT(KeywordType kt, ref string key)
+        {
+            if (key.ContainsCI("CAUSE:") || key.ContainsCI("CAUSES:"))
+            {
+                key = "";
+                return KeywordType.CAUSE;
+            }
+            else if (key.ContainsCI("ACTION:") || key.ContainsCI("ACTIONS:"))
+            {
+                key = "";
+                return KeywordType.ACTION;
+            }
+            else if (key.ContainsCI("PART:") || key.ContainsCI("PARTS:"))
+            {
+                key = "";
+                return KeywordType.PARTS;
+            }
+            else
+                return kt;
         }
 
         private void readButton_Click(object sender, EventArgs e)
@@ -94,6 +139,7 @@ namespace ShirtekApp1
                 adapter.Fill(ds, "Sheet1");
 
                 DataTable dataTable = ds.Tables["Sheet1"];
+                KeywordType keywordType = KeywordType.UNKNOWN;
 
                 if (dataTable.Rows.Count >= 55 && dataTable.Columns.Count >= 13)
                 {
@@ -105,10 +151,46 @@ namespace ShirtekApp1
                     woData.storeCode1 = (array.Length > 0) ? array[0] : "";
                     woData.storeCode2 = (array.Length > 1) ? array[1] : "";
                     woData.doNumber = (dataTable.Rows[17][8] != null) ? dataTable.Rows[17][8].ToString() : "";
-                    woData.woNumber = (dataTable.Rows[17][8] != null) ? "B" + dataTable.Rows[16][8].ToString() + dataTable.Rows[50][1].ToString(): "";
+                    woData.woNumber = (dataTable.Rows[16][8] != null) ? "B" + dataTable.Rows[16][8].ToString() + dataTable.Rows[50][1].ToString(): "";
                     woData.netAmount = (dataTable.Rows[54][12] != null) ? dataTable.Rows[54][12].ToString() : "";
                     woData.fileName = fileName;
                     woData.invNumber = (dataTable.Rows[5][10] != null) ? dataTable.Rows[5][10].ToString() : "";
+                    woData.labourCharge = (dataTable.Rows[19][12] != null) ? dataTable.Rows[19][12].ToString() : "";
+
+                    for (int i = 19; i<dataTable.Rows.Count; i++)
+                    {
+                        string extract = (dataTable.Rows[i][4] != null) ? dataTable.Rows[i][4].ToString() : "";
+                        keywordType = convertToKT(keywordType, ref extract);
+                        if (extract == "") continue;
+
+                        switch(keywordType)
+                        {
+                            case KeywordType.UNKNOWN:
+                                if (extract.ContainsCI("Freser")) woData.isFreser = "1";
+                                if (extract.ContainsCI("Backroom")) woData.isBackroom = "1";
+                                if (extract.ContainsCI("Tower")) woData.isTower = "1";
+                                if (extract.ContainsCI("Orange")) woData.isOJ = "1";
+                                if (extract.ContainsCI("Other")) woData.isOther = "1";
+                                break;
+                            case KeywordType.CAUSE:
+                                if (woData.cause != "") extract = "\n" + extract;
+                                woData.cause += extract;
+                                break;
+                            case KeywordType.ACTION:
+                                if (woData.action != "") extract = "\n" + extract;
+                                woData.action += extract;
+                                break;
+                            case KeywordType.PARTS:
+                                string partQty = (dataTable.Rows[i][2] != null) ? dataTable.Rows[i][2].ToString() : "";
+                                extract = partQty + ": " + extract;
+                                if (woData.parts != "") extract = "\n" + extract;
+                                woData.parts += extract;
+                                string partCharges = (dataTable.Rows[i][12] != null) ? dataTable.Rows[i][12].ToString() : "";
+                                if (woData.partCharge != "") partCharges = "\n" + partCharges;
+                                woData.partCharge += partCharges;
+                                break;
+                        }
+                    }
 
                     string result = Regex.Replace(woData.fileName, @"[^\d]", "");
                     long.TryParse(result, out woData.fileNumber);
@@ -145,33 +227,91 @@ namespace ShirtekApp1
                 rowIndex++;
             }
 
-            //dataGridView1.Sort(setDataGridCol(14], ListSortDirection.Ascending);
-            dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            dataGridView2.SuspendLayout();
+            dataGridView2.Rows.Add(woDataList.Count);
 
-            dataGridView1.ResumeLayout();
-            dataGridView1.ClearSelection();
-            for (int i = 0; i < dataGridView1.ColumnCount - 1; i++)
+            rowIndex = 0;
+            foreach (WorkOrderData wod in woDataListSorted)
             {
-                for (int r = 0; r < dataGridView1.RowCount; r++)
-                    dataGridView1[i, r].Selected = true;
-            }
-            //dataGridView1.SelectAll();
+                dataGridView2.Rows[rowIndex].Cells[0].Value = rowIndex + 1;
+                dataGridView2.Rows[rowIndex].Cells[1].Value = wod.woNumber;
+                dataGridView2.Rows[rowIndex].Cells[2].Value = wod.doNumber;
+                dataGridView2.Rows[rowIndex].Cells[3].Value = wod.date;
+                dataGridView2.Rows[rowIndex].Cells[4].Value = wod.storeCode1;
+                dataGridView2.Rows[rowIndex].Cells[5].Value = wod.storeCode2;
 
-            
-            DataObject dataObj = dataGridView1.GetClipboardContent();
+                dataGridView2.Rows[rowIndex].Cells[6].Value = "";
+                dataGridView2.Rows[rowIndex].Cells[7].Value = "";
+
+                dataGridView2.Rows[rowIndex].Cells[8].Value = wod.labourCharge;
+                dataGridView2.Rows[rowIndex].Cells[9].Value = wod.partCharge;
+                dataGridView2.Rows[rowIndex].Cells[10].Value = wod.netAmount;
+
+                dataGridView2.Rows[rowIndex].Cells[11].Value = wod.cause;
+                dataGridView2.Rows[rowIndex].Cells[12].Value = wod.action;
+                dataGridView2.Rows[rowIndex].Cells[13].Value = wod.parts;
+
+                dataGridView2.Rows[rowIndex].Cells[14].Value = wod.isFreser;
+                dataGridView2.Rows[rowIndex].Cells[15].Value = wod.isTower;
+                dataGridView2.Rows[rowIndex].Cells[16].Value = wod.isBackroom;
+                dataGridView2.Rows[rowIndex].Cells[17].Value = wod.isOJ;
+                dataGridView2.Rows[rowIndex].Cells[18].Value = wod.isOther;
+                
+                
+                rowIndex++;
+            }
+
+
+            copyAll(dataGridView1, 1);
+            statusStrip1.Text = woDataListSorted.Count + " files read. Data copied to clipboard. Paste directly to Excel.";
+        }
+
+        void copyAll(DataGridView dgv, int lessCol = 0)
+        {
+            dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            dgv.ResumeLayout();
+            dgv.ClearSelection();
+            for (int i = 0; i < dgv.ColumnCount - lessCol; i++)
+            {
+                for (int r = 0; r < dgv.RowCount; r++)
+                    dgv[i, r].Selected = true;
+            }
+
+            DataObject dataObj = dgv.GetClipboardContent();
             Clipboard.SetDataObject(dataObj, true);
 
-            statusStrip1.Text = woDataListSorted.Count + " files read. Data copied to clipboard. Paste directly to Excel ;)";
+            statusStrip1.Text = "Data copied to clipboard. Paste directly to Excel.";
         }
 
-        void setDataGridCol(int index, string header, int widthFillWeight = 100)
+        void setDataGridCol(DataGridView dgv, int index, string header, int widthFillWeight = 100)
         {
-            dataGridView1.Columns[index].HeaderText = header;
-            dataGridView1.Columns[index].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridView1.Columns[index].FillWeight = widthFillWeight;
+            dgv.Columns[index].HeaderText = header;
+            dgv.Columns[index].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dgv.Columns[index].FillWeight = widthFillWeight;
+            dgv.Columns[index].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            dgv.Columns[index].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
         }
 
+        private void copyBut1_Click(object sender, EventArgs e)
+        {
+            copyAll(dataGridView1, 1);
+        }
+
+        private void copyBut2_Click(object sender, EventArgs e)
+        {
+            copyAll(dataGridView2);
+        }
     }
+
+    public static class StringExtensions
+    {
+        public static bool ContainsCI(this string source, string toCheck)
+        {
+            return source?.IndexOf(toCheck, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+    }
+
+    public enum KeywordType { UNKNOWN, CAUSE, ACTION, PARTS }
 
     public class WorkOrderData
     {
@@ -184,5 +324,16 @@ namespace ShirtekApp1
         public string fileName;
         public string invNumber;
         public long fileNumber = 0;
+        public string cause = "";
+        public string action = "";
+        public string parts = "";
+        public string partCharge = "";
+        public string labourCharge = "";
+        public string isFreser = "";
+        public string isTower = "";
+        public string isBackroom = "";
+        public string isOJ = "";
+        public string isOther = "";
+
     }
 }
